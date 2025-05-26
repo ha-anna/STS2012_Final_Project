@@ -5,8 +5,7 @@ import random
 import shutil
 
 from tensorflow.keras import Input
-from tensorflow.keras.layers import (Conv2D, Dense, Dropout, Flatten,
-                                     MaxPooling2D)
+from tensorflow.keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPooling2D
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
@@ -80,7 +79,11 @@ val_generator = datagen.flow_from_directory(
 model = Sequential(
     [
         Input(shape=(img_size, img_size, 1)),
-        Conv2D(32, kernel_size=(3, 3), activation="relu",),
+        Conv2D(
+            32,
+            kernel_size=(3, 3),
+            activation="relu",
+        ),
         MaxPooling2D(pool_size=(2, 2)),
         Conv2D(64, kernel_size=(3, 3), activation="relu"),
         MaxPooling2D(pool_size=(2, 2)),
@@ -99,6 +102,9 @@ model.fit(train_generator, validation_data=val_generator, epochs=10)
 
 date = datetime.datetime.now()
 formatted_date = date.strftime("%Y-%m-%d_%H-%M-%S")
+
+model_dir = os.path.join(ROOT_DIR, "model")
+os.makedirs(model_dir, exist_ok=True)
 
 model_name = "./model/asl_cnn_model_(" + formatted_date + ").keras"
 model.save(model_name)
