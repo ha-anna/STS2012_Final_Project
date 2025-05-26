@@ -23,7 +23,7 @@ to improve inclusivity and bridge communication gaps using computer vision.
 
 You must first download the
 [ASL(American Sign Language) Alphabet Dataset](https://www.kaggle.com/datasets/debashishsau/aslamerican-sign-language-aplhabet-dataset)
-and place it in `data` folder.
+and place it in the `data` folder.
 
 Create and activate a virtual environment:
 
