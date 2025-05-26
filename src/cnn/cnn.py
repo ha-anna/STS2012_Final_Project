@@ -100,13 +100,11 @@ model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accur
 
 model.fit(train_generator, validation_data=val_generator, epochs=10)
 
-date = datetime.datetime.now()
-formatted_date = date.strftime("%Y-%m-%d_%H-%M-%S")
 
 model_dir = os.path.join(ROOT_DIR, "model")
 os.makedirs(model_dir, exist_ok=True)
 
-model_name = "./model/asl_cnn_model_(" + formatted_date + ").keras"
+model_name = "./model/asl_cnn_model.keras"
 model.save(model_name)
 
 

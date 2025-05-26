@@ -7,7 +7,7 @@ from tensorflow.keras.models import load_model
 # organization of directories
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../"))
-MODEL_DIR = os.path.join(ROOT_DIR, "model", "asl_cnn_model_(2025-05-26_19-05-40).keras")
+MODEL_DIR = os.path.join(ROOT_DIR, "model", "asl_cnn_model.keras")
 CLASS_INDICES_DIR = os.path.join(ROOT_DIR, "model", "class_indices.json")
 
 model = load_model(MODEL_DIR)
