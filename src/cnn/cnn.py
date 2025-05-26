@@ -63,7 +63,8 @@ train_generator = datagen.flow_from_directory(
     subset="training",
 )
 
-with open("class_indices.json", "w") as f:
+os.makedirs("../../model", exist_ok=True)
+with open("../../model/class_indices.json", "w") as f:
     json.dump(train_generator.class_indices, f)
 
 val_generator = datagen.flow_from_directory(
