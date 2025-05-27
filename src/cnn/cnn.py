@@ -1,3 +1,4 @@
+from art import *
 import datetime
 import json
 import os
@@ -13,17 +14,19 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # src/cnn
 ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../"))  # project root
 data_dir = os.path.join(ROOT_DIR, "data", "ASL_Alphabet_Dataset")
 train_dir = os.path.join(data_dir, "asl_alphabet_train")
-# test_dir = data_dir + "/asl_alphabet_test"
 reduced_dir = os.path.join(data_dir, "reduced_train")
 
 img_size = 64
-batch_size = 32
+batch_size = 40
 
 selected_classes = ["A", "B", "E", "I", "L", "N", "S"]
 images_per_class = 3000
 
-date_start = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+# Print the starting time and a decorative message
+date_start = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+tprint("", decoration="love_music")
 print(f"Starting data preparation at {date_start}")
+tprint("", decoration="love_music")
 
 if os.path.exists(reduced_dir):
     shutil.rmtree(reduced_dir)
@@ -95,7 +98,7 @@ model = Sequential(
         Flatten(),
         Dropout(0.5),
         Dense(256, activation="relu"),
-        Dense(7, activation="softmax"),
+        Dense(7, activation="softmax"), # dense value should match number of selected_classes
     ]
 )
 
@@ -110,11 +113,13 @@ os.makedirs(model_dir, exist_ok=True)
 model_name = "./model/asl_cnn_model.keras"
 model.save(model_name)
 
-date_end = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+# Check how long it took to prepare the data and train the model
+date_end = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+tprint("", decoration="love_music")
 print(f"Model saved to {model_name} at {date_end}")
 print("Time taken for data preparation and training: "
-      f"{datetime.datetime.strptime(date_end, '%Y-%m-%d_%H-%M-%S') - datetime.datetime.strptime(date_start, '%Y-%m-%d_%H-%M-%S')}")
-
+      f"{datetime.datetime.strptime(date_end, '%Y-%m-%d %H:%M:%S') - datetime.datetime.strptime(date_start, '%Y-%m-%d %H:%M:%S')}")
+tprint("", decoration="love_music")
 
 loss, accuracy = model.evaluate(val_generator)
 print(f"Validation Loss: {loss}")
