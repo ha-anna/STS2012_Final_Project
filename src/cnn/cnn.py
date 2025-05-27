@@ -22,6 +22,8 @@ batch_size = 32
 selected_classes = ["A", "B", "E", "I", "L", "N", "S"]
 images_per_class = 3000
 
+date_start = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+print(f"Starting data preparation at {date_start}")
 
 if os.path.exists(reduced_dir):
     shutil.rmtree(reduced_dir)
@@ -93,7 +95,7 @@ model = Sequential(
         Flatten(),
         Dropout(0.5),
         Dense(256, activation="relu"),
-        Dense(7, activation="softmax"),  # 29 classes
+        Dense(7, activation="softmax"),
     ]
 )
 
@@ -107,6 +109,11 @@ os.makedirs(model_dir, exist_ok=True)
 
 model_name = "./model/asl_cnn_model.keras"
 model.save(model_name)
+
+date_end = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+print(f"Model saved to {model_name} at {date_end}")
+print("Time taken for data preparation and training: "
+      f"{datetime.datetime.strptime(date_end, '%Y-%m-%d_%H-%M-%S') - datetime.datetime.strptime(date_start, '%Y-%m-%d_%H-%M-%S')}")
 
 
 loss, accuracy = model.evaluate(val_generator)
