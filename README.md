@@ -15,9 +15,9 @@ We chose this topic because we wanted to work on something meaningful, socially
 relevant, and that we find interesting. There are many areas in accessibility
 that still need to be improved. Sign language allows humans to communicate
 without sound, and plays a critical role in accessibility and communication for
-the Deaf and hard-of-hearing communities. By exploring ASL sign detection, we
-wanted to understand how deep learning can be applied to improve inclusivity and
-bridge communication gaps using computer vision.
+the Deaf and hard-of-hearing communities. By exploring ASL sign detection,make
+we wanted to understand how deep learning can be applied to improve inclusivity
+and bridge communication gaps using computer vision.
 
 ## Discoveries
 
