@@ -19,3 +19,6 @@ run:
 lint:
 	black src
 	isort src
+
+intro:
+	python -m src.main
