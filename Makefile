@@ -14,7 +14,7 @@ train:
 	python -m src.cnn.cnn
 
 run:
-	python -m src.face_recognition.face_recognition
+	python -m src.sign_recognition.sign_recognition
 
 lint:
 	black src
