@@ -1,6 +1,5 @@
 from art import *
 
-
 def main():
     tprint("                               ASL")
     tprint("           Interpreter")
