@@ -1,14 +1,13 @@
-from art import *
-import datetime
-import json
 import os
-import random
-import shutil
 
+import matplotlib.pyplot as plt
 from tensorflow.keras import Input
-from tensorflow.keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPooling2D
+from tensorflow.keras.layers import (Conv2D, Dense, Dropout, Flatten,
+                                     MaxPooling2D)
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from utils import (create_reduced_dir, print_end_message, print_model_summary,
+                   print_start_message, save_class_indices, save_model)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # src/cnn
 ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../"))  # project root
@@ -22,40 +21,17 @@ batch_size = 40
 selected_classes = ["A", "B", "E", "I", "L", "N", "S"]
 images_per_class = 3000
 
-# Print the starting time and a decorative message
-date_start = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-tprint("", decoration="love_music")
-print(f"Starting data preparation at {date_start}")
-tprint("", decoration="love_music")
-
-if os.path.exists(reduced_dir):
-    shutil.rmtree(reduced_dir)
-
-os.makedirs(reduced_dir)
-
-for cls in selected_classes:
-    src_folder = os.path.join(train_dir, cls)
-    dst_folder = os.path.join(reduced_dir, cls)
-    os.makedirs(dst_folder, exist_ok=True)
-
-    images = [
-        f for f in os.listdir(src_folder) if os.path.isfile(os.path.join(src_folder, f))
-    ]
-    selected_imgs = random.sample(images, min(images_per_class, len(images)))
-
-    for img in selected_imgs:
-        shutil.copy(os.path.join(src_folder, img), os.path.join(dst_folder, img))
-
-    print(f"Copied {len(selected_imgs)} images for class '{cls}'")
+start_date = print_start_message()
+create_reduced_dir(reduced_dir, train_dir, selected_classes, images_per_class)
 
 datagen = ImageDataGenerator(
     rescale=1.0 / 255,
     validation_split=0.2,  # 80/20 train/val split
-    # rotation_range=10,
-    # zoom_range=0.1,
-    # width_shift_range=0.1,
-    # height_shift_range=0.1,
-    # horizontal_flip=True,
+    rotation_range=15,
+    zoom_range=0.1,
+    width_shift_range=0.1,
+    height_shift_range=0.1,
+    horizontal_flip=True,
 )
 
 train_generator = datagen.flow_from_directory(
@@ -68,9 +44,7 @@ train_generator = datagen.flow_from_directory(
     subset="training",
 )
 
-os.makedirs("../../model", exist_ok=True)
-with open("../../model/class_indices.json", "w") as f:
-    json.dump(train_generator.class_indices, f)
+save_class_indices(train_generator)
 
 val_generator = datagen.flow_from_directory(
     reduced_dir,
@@ -98,28 +72,45 @@ model = Sequential(
         Flatten(),
         Dropout(0.5),
         Dense(256, activation="relu"),
-        Dense(7, activation="softmax"), # dense value should match number of selected_classes
+        Dense(
+            7, activation="softmax"
+        ),  # dense value should match number of selected_classes
     ]
 )
 
+
 model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
 
-model.fit(train_generator, validation_data=val_generator, epochs=10)
+history = model.fit(train_generator, validation_data=val_generator, epochs=15)
 
+# Plot training & validation loss
+plt.figure(figsize=(12, 5))
 
-model_dir = os.path.join(ROOT_DIR, "model")
-os.makedirs(model_dir, exist_ok=True)
+plt.subplot(1, 2, 1)
+plt.plot(history.history["loss"], label="Training Loss")
+plt.plot(history.history["val_loss"], label="Validation Loss")
+plt.title("Model Loss")
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+plt.legend()
 
-model_name = "./model/asl_cnn_model.keras"
-model.save(model_name)
+# Plot training & validation accuracy
+plt.subplot(1, 2, 2)
+plt.plot(history.history["accuracy"], label="Training Accuracy")
+plt.plot(history.history["val_accuracy"], label="Validation Accuracy")
+plt.title("Model Accuracy")
+plt.xlabel("Epoch")
+plt.ylabel("Accuracy")
+plt.legend()
 
-# Check how long it took to prepare the data and train the model
-date_end = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-tprint("", decoration="love_music")
-print(f"Model saved to {model_name} at {date_end}")
-print("Time taken for data preparation and training: "
-      f"{datetime.datetime.strptime(date_end, '%Y-%m-%d %H:%M:%S') - datetime.datetime.strptime(date_start, '%Y-%m-%d %H:%M:%S')}")
-tprint("", decoration="love_music")
+plt.tight_layout()
+plt.show()
+
+save_model(model, ROOT_DIR)
+
+print_end_message(start_date)
+
+print_model_summary(model)
 
 loss, accuracy = model.evaluate(val_generator)
 print(f"Validation Loss: {loss}")
