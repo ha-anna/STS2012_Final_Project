@@ -21,20 +21,21 @@ img_size = 64
 batch_size = 32
 
 selected_classes = ["A", "B", "C", "D"]
-images_per_class = 3000
+images_per_class = 5000
 
 start_date = print_start_message()
 create_reduced_dir(reduced_dir, train_dir, selected_classes, images_per_class)
 
 datagen = ImageDataGenerator(
     rescale=1.0 / 255,
-    validation_split=0.2,  # 80/20 train/val split
-    rotation_range=15,      # additional
-    zoom_range=0.1,         # additional
-    width_shift_range=0.1,  # additional
-    height_shift_range=0.1, # additional
-    horizontal_flip=True,   # additional
+    validation_split=0.2,
+    rotation_range=20,
+    zoom_range=0.2,
+    width_shift_range=0.1,
+    height_shift_range=0.1,
+    horizontal_flip=True,
 )
+
 
 train_generator = datagen.flow_from_directory(
     reduced_dir,
@@ -60,29 +61,21 @@ val_generator = datagen.flow_from_directory(
 
 model = Sequential(
     [
-        Input(shape=(img_size, img_size, 1)), #greyscale input
-        Conv2D(
-            32,
-            kernel_size=(3, 3),
-            activation="relu",
-        ),
+        Input(shape=(img_size, img_size, 1)),
+        Conv2D(32, kernel_size=(3, 3), activation="relu"),
         MaxPooling2D(pool_size=(2, 2)),
-        Conv2D(64, kernel_size=(3, 3), activation="relu"),
-        MaxPooling2D(pool_size=(2, 2)),
-        Conv2D(128, kernel_size=(3, 3), activation="relu"),
+        Conv2D(16, kernel_size=(3, 3), activation="relu"),
         MaxPooling2D(pool_size=(2, 2)),
         Flatten(),
-        Dropout(0.5),
-        Dense(256, activation="relu"),
-        Dense(
-            4, activation="softmax"
-        ),  # dense value should match number of selected_classes
+        Dropout(0.7),
+        Dense(32, activation="relu"),
+        Dense(len(selected_classes), activation="softmax"),
     ]
 )
 
 model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
 
-history = model.fit(train_generator, validation_data=val_generator, epochs=15)
+history = model.fit(train_generator, validation_data=val_generator, epochs=45)
 
 save_history_to_json(
     history,
