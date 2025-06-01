@@ -1,13 +1,15 @@
 import os
 
-import matplotlib.pyplot as plt
 from tensorflow.keras import Input
 from tensorflow.keras.layers import (Conv2D, Dense, Dropout, Flatten,
                                      MaxPooling2D)
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from utils import (create_reduced_dir, print_end_message, print_model_summary,
-                   print_start_message, save_class_indices, save_model)
+
+from .utils import (create_reduced_dir, plot_model_loss_accuracy,
+                    print_end_message, print_model_summary,
+                    print_start_message, save_class_indices,
+                    save_history_to_json, save_model)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # src/cnn
 ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../"))  # project root
@@ -16,9 +18,9 @@ train_dir = os.path.join(data_dir, "asl_alphabet_train")
 reduced_dir = os.path.join(data_dir, "reduced_train")
 
 img_size = 64
-batch_size = 40
+batch_size = 32
 
-selected_classes = ["A", "B", "E", "I", "L", "N", "S"]
+selected_classes = ["A", "B", "C", "D"]
 images_per_class = 3000
 
 start_date = print_start_message()
@@ -73,38 +75,20 @@ model = Sequential(
         Dropout(0.5),
         Dense(256, activation="relu"),
         Dense(
-            7, activation="softmax"
+            4, activation="softmax"
         ),  # dense value should match number of selected_classes
     ]
 )
-
 
 model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
 
 history = model.fit(train_generator, validation_data=val_generator, epochs=15)
 
-# Plot training & validation loss
-plt.figure(figsize=(12, 5))
+save_history_to_json(
+    history,
+)
 
-plt.subplot(1, 2, 1)
-plt.plot(history.history["loss"], label="Training Loss")
-plt.plot(history.history["val_loss"], label="Validation Loss")
-plt.title("Model Loss")
-plt.xlabel("Epoch")
-plt.ylabel("Loss")
-plt.legend()
-
-# Plot training & validation accuracy
-plt.subplot(1, 2, 2)
-plt.plot(history.history["accuracy"], label="Training Accuracy")
-plt.plot(history.history["val_accuracy"], label="Validation Accuracy")
-plt.title("Model Accuracy")
-plt.xlabel("Epoch")
-plt.ylabel("Accuracy")
-plt.legend()
-
-plt.tight_layout()
-plt.show()
+plot_model_loss_accuracy(history)
 
 save_model(model, ROOT_DIR)
 

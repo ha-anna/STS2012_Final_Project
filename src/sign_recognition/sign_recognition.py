@@ -1,5 +1,5 @@
-import json
 import os
+import pickle
 
 import cv2
 import numpy as np
@@ -9,13 +9,13 @@ from tensorflow.keras.models import load_model
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../"))
 MODEL_DIR = os.path.join(ROOT_DIR, "model", "asl_cnn_model.keras")
-CLASS_INDICES_DIR = os.path.join(ROOT_DIR, "model", "class_indices.json")
+CLASS_INDICES_DIR = os.path.join(ROOT_DIR, "model", "class_indices.pkl")
 
 model = load_model(MODEL_DIR)
 
 IMG_SIZE = 64
-with open(CLASS_INDICES_DIR) as f:
-    CLASS_NAMES = json.load(f)
+with open(CLASS_INDICES_DIR, "rb") as f:
+    CLASS_NAMES = pickle.load(f)
 LABELS = list(CLASS_NAMES.keys())
 
 # Start webcam
@@ -27,6 +27,8 @@ while True:
         break
 
     # Crop the region where hand is expected
+    # TODO: readjust this and the draw box, seems the area is not correct/too big
+    # TODO: can we make it possible for the model to detect the hand and draw a box around it?
     roi = frame[100:1000, 100:600]
 
     # Preprocess ROI like training data
