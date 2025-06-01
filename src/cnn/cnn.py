@@ -29,11 +29,11 @@ create_reduced_dir(reduced_dir, train_dir, selected_classes, images_per_class)
 datagen = ImageDataGenerator(
     rescale=1.0 / 255,
     validation_split=0.2,  # 80/20 train/val split
-    rotation_range=15,
-    zoom_range=0.1,
-    width_shift_range=0.1,
-    height_shift_range=0.1,
-    horizontal_flip=True,
+    rotation_range=15,      # additional
+    zoom_range=0.1,         # additional
+    width_shift_range=0.1,  # additional
+    height_shift_range=0.1, # additional
+    horizontal_flip=True,   # additional
 )
 
 train_generator = datagen.flow_from_directory(
@@ -60,7 +60,7 @@ val_generator = datagen.flow_from_directory(
 
 model = Sequential(
     [
-        Input(shape=(img_size, img_size, 1)),
+        Input(shape=(img_size, img_size, 1)), #greyscale input
         Conv2D(
             32,
             kernel_size=(3, 3),
