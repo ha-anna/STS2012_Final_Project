@@ -35,6 +35,10 @@ You must first download the
 [ASL(American Sign Language) Alphabet Dataset](https://www.kaggle.com/datasets/debashishsau/aslamerican-sign-language-aplhabet-dataset)
 and place it in the `data` folder.
 
+This project uses `poetry`, a tool for dependency management and packaging in
+Python.Follow this tutorial to install it on your machine:
+[Poetry installation](https://python-poetry.org/docs/)
+
 Create and activate a virtual environment:
 
 ```
