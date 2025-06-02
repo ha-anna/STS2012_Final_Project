@@ -1,39 +1,45 @@
-# Makefile
-
 VENV_PATH=.venv
-ACTIVATE=source $(VENV_PATH)/bin/activate
 
 # Create venv and install dependencies
 setup:
-	python3 -m pip install --upgrade pip
-	python3 -m venv $(VENV_PATH)
-	$(ACTIVATE) && pip install -r requirements.txt
+	poetry config virtualenvs.in-project true
+	poetry install
 
-# Save current environment to requirements.txt
+# Save current environment to poetry.lock (auto-managed)
 freeze:
-	$(ACTIVATE) && pip freeze > requirements.txt
+	poetry lock
 
-# Install from requirements.txt
+# Install from pyproject.toml and poetry.lock
 install:
-	$(ACTIVATE) && pip install -r requirements.txt
+	poetry install
+
+# Add a new dependency via poetry and update lock file
+add-dep:
+	@echo "Usage: make add-dep pkg=package_name"
+	@if [ -z "$(pkg)" ]; then echo "Error: pkg variable not set"; exit 1; fi
+	poetry add $(pkg)
+
+# Remove a dependency using Poetry
+remove-dep:
+	@poetry remove $(pkg)
 
 # Train the CNN model
 train:
-	$(ACTIVATE) && python -m src.cnn.cnn
+	poetry run python -m src.cnn.cnn
 
 # Run the ASL recognition script
 run:
-	$(ACTIVATE) && python -m src.sign_recognition.sign_recognition
+	poetry run python -m src.sign_recognition.sign_recognition
 
 # Format and sort imports
 lint:
-	black src
-	isort src
+	poetry run black src
+	poetry run isort src
 
 # Run intro script
 intro:
-	$(ACTIVATE) && python -m src.main
+	poetry run python -m src.main
 
 # Show stats
 stats:
-	$(ACTIVATE) && python -m src.cnn.stats
+	poetry run python -m src.cnn.stats

@@ -43,15 +43,41 @@ make setup
 
 This will:
 
-- Upgrade `pip`
-- Install dependencies from `requirements.txt`
-- Create a virtual environment in `.venv`
-- Activate the virtual environment
+- Configure Poetry to create the virtual environment inside the project (`.venv`
+  folder)
+- Install all dependencies specified in `pyproject.toml`
 
-**Note:** On macOS/Linux, activation is done via:
+**Note:** You don’t need to manually activate the virtual environment. Use
+`poetry run` or `make` commands which automatically run inside it.
+
+### 🚨 Managing Dependencies (Add or Remove Packages)
+
+**Important:** Always use Poetry commands to add or remove dependencies, never
+use pip install directly. This keeps your `pyproject.toml` and `poetry.lock`
+files consistent.
+
+To add a new package:
 
 ```
-source .venv/bin/activate
+make add-dep PACKAGE=package_name
+
+```
+
+Example:
+
+```
+make add-dep pkg=numpy
+
+```
+
+This runs poetry add requests under the hood and updates your lock file
+automatically.
+
+To remove a package:
+
+```
+make remove-dep pkg=requests
+
 ```
 
 ### 📦 Install Dependencies (if .venv already exists)
@@ -98,7 +124,7 @@ make freeze
 
 ```
 
-This updates requirements.txt with the current list of installed packages.
+Updates poetry.lock to lock the current dependency versions.
 
 ### Project Intro
 
