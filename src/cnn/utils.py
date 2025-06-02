@@ -62,9 +62,11 @@ def create_reduced_dir(reduced_dir, train_dir, selected_classes, images_per_clas
         print(f"Copied {len(selected_imgs)} images for class '{cls}'")
 
 
-def save_class_indices(train_generator):
-    os.makedirs("../../model", exist_ok=True)
-    with open("../../model/class_indices.pkl", "wb") as f:
+def save_class_indices(train_generator, ROOT_DIR):
+    model_dir = os.path.join(ROOT_DIR, "model")
+    os.makedirs(model_dir, exist_ok=True)
+
+    with open("./model/class_indices.pkl", "wb") as f:
         pickle.dump(train_generator.class_indices, f)
 
 
@@ -102,7 +104,10 @@ def plot_model_loss_accuracy(model):
     plt.show()
 
 
-def save_history_to_json(model):
-    os.makedirs("../../model", exist_ok=True)
-    with open("../../model/history.pkl", "wb") as f:
-        pickle.dump(model.history, f)
+def pickle_history(history, ROOT_DIR):
+    model_dir = os.path.join(ROOT_DIR, "model")
+    os.makedirs(model_dir, exist_ok=True)
+
+    with open("./model/history.pkl", "wb") as f:
+        pickle.dump(history.history, f)
+    print("Model training history saved to ./model/history.pkl")
