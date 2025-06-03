@@ -27,6 +27,11 @@ What we have learned while working on this project:
 
 - Model struggles with recognition of signs that look similar
 
+**Learn more:**
+
+- Training and Validation Metrics, Confusion Matrix graphs can be found in
+  `./model/stats`, the files are organized by date.
+
 ## Getting started
 
 ### 🔧 Setup
