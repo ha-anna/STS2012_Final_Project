@@ -1,5 +1,6 @@
 import os
 import pickle
+import datetime
 
 from matplotlib import pyplot as plt
 from tensorflow.keras.models import load_model
@@ -23,4 +24,10 @@ plt.xlabel("Epoch")
 plt.ylabel("Metric")
 plt.title("Training and Validation Metrics")
 plt.legend()
+
+date = datetime.datetime.now().strftime("%y%m%d_%I:%M")
+filename = f"training_validation_metric_{date}.png"
+full_path = os.path.join(ROOT_DIR, "model", "stats", filename)
+os.makedirs(os.path.dirname(full_path), exist_ok=True)
+plt.savefig(full_path)
 plt.show()
