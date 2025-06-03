@@ -232,6 +232,7 @@ $RECYCLE.BIN/
 *.lnk
 
 ASL_Alphabet_Dataset
-model
+model/*
 class_indices.json
 .vscode/
+!model/stats
