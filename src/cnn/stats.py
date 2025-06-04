@@ -1,6 +1,6 @@
+import datetime
 import os
 import pickle
-import datetime
 
 from matplotlib import pyplot as plt
 from tensorflow.keras.models import load_model
