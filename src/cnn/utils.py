@@ -5,7 +5,9 @@ import random
 import shutil
 
 import matplotlib.pyplot as plt
+import numpy as np
 from art import *
+from tensorflow.keras.callbacks import ModelCheckpoint
 
 
 def print_start_message():
@@ -79,6 +81,16 @@ def save_model(model, ROOT_DIR):
     print(f"Model saved to {model_name}")
 
 
+def save_model_checkpoint(ROOT_DIR):
+    model_dir = os.path.join(ROOT_DIR, "model")
+    os.makedirs(model_dir, exist_ok=True)
+
+    checkpoint = ModelCheckpoint(
+        "best_model.keras", save_best_only=True, monitor="val_loss"
+    )
+    return checkpoint
+
+
 def plot_model_loss_accuracy(model):
     plt.figure(figsize=(12, 5))
 
@@ -111,3 +123,10 @@ def pickle_history(history, ROOT_DIR):
     with open("./model/history.pkl", "wb") as f:
         pickle.dump(history.history, f)
     print("Model training history saved to ./model/history.pkl")
+
+
+def adjust_contrast(image):
+    alpha = np.random.uniform(0.8, 1.2)  # Contrast control (1.0 = original)
+    image = image * alpha
+    image = np.clip(image, 0, 255)
+    return image
