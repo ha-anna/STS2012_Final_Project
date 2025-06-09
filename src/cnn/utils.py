@@ -5,6 +5,7 @@ import random
 import shutil
 
 import matplotlib.pyplot as plt
+import numpy as np
 from art import *
 
 
@@ -111,3 +112,10 @@ def pickle_history(history, ROOT_DIR):
     with open("./model/history.pkl", "wb") as f:
         pickle.dump(history.history, f)
     print("Model training history saved to ./model/history.pkl")
+
+
+def adjust_contrast(image):
+    alpha = np.random.uniform(0.8, 1.2)  # Contrast control (1.0 = original)
+    image = image * alpha
+    image = np.clip(image, 0, 255)
+    return image
