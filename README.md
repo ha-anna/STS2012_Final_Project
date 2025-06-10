@@ -26,6 +26,8 @@ and bridge communication gaps using computer vision.
 What we have learned while working on this project:
 
 - Model struggles with recognition of signs that look similar
+- A better way to recognize the position of fingers and hand is necessary
+- Recognizing input from webcam is harder due to it being much more dynamic
 
 **Learn more:**
 
@@ -69,14 +71,12 @@ To add a new package:
 
 ```
 make add-dep PACKAGE=package_name
-
 ```
 
 Example:
 
 ```
 make add-dep pkg=numpy
-
 ```
 
 This runs poetry add requests under the hood and updates your lock file
@@ -86,7 +86,6 @@ To remove a package:
 
 ```
 make remove-dep pkg=requests
-
 ```
 
 ### 📦 Install Dependencies (if .venv already exists)
@@ -110,7 +109,6 @@ and trains a CNN model on selected ASL classes.
 
 ```
 make run
-
 ```
 
 This runs the sign recognition script located at
@@ -130,7 +128,6 @@ This formats your code using black and isort for clean, consistent style.
 
 ```
 make freeze
-
 ```
 
 Updates poetry.lock to lock the current dependency versions.
