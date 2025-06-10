@@ -57,7 +57,7 @@ while cap.isOpened():
         break
 
     # Defines a Region Of Interest (ROI) where the hand sign is expected.
-    roi = frame[100:600, 100:600]
+    roi = frame[50:650, 50:650]
 
     # Preprocesses the ROI image to match the model's expected input format.
     gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
@@ -72,7 +72,7 @@ while cap.isOpened():
     label = LABELS[class_idx]
 
     # Draws a green rectangle around the ROI on the original frame.
-    cv2.rectangle(frame, (100, 100), (599, 599), (0, 255, 0), 2)
+    cv2.rectangle(frame, (50, 50), (649, 649), (0, 255, 0), 2)
 
     # Puts the predicted label text on the frame.
     cv2.putText(
@@ -88,7 +88,7 @@ while cap.isOpened():
     cv2.imshow("ASL Sign Detection Live", frame)
 
     # Breaks the loop if 'q' key is pressed, allowing the user to quit.
-    if cv2.waitKey(150) & 0xFF == ord("q"):
+    if cv2.waitKey(300) & 0xFF == ord("q"):
         break
 
 # --- Cleanup ---
