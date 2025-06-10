@@ -10,11 +10,11 @@ from tensorflow.keras import Input
 from tensorflow.keras.callbacks import (EarlyStopping, ModelCheckpoint,
                                         ReduceLROnPlateau)
 from tensorflow.keras.layers import (BatchNormalization, Conv2D, Dense,
-                                     Dropout, Flatten, GlobalAveragePooling2D,
+                                     Dropout, GlobalAveragePooling2D,
                                      MaxPooling2D)
 from tensorflow.keras.losses import CategoricalCrossentropy
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.optimizers import Adam, AdamW
+from tensorflow.keras.optimizers import AdamW
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.regularizers import l2
 
@@ -23,23 +23,33 @@ from .utils import (adjust_contrast, create_reduced_dir, pickle_history,
                     print_model_summary, print_start_message,
                     save_class_indices, save_model)
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # src/cnn
-ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../"))  # project root
+# --- Path Configuration ---
+BASE_DIR = os.path.dirname(
+    os.path.abspath(__file__)
+)  # Gets the directory of the current script.
+ROOT_DIR = os.path.abspath(
+    os.path.join(BASE_DIR, "../../")
+)  # Navigates up to the project root.
 data_dir = os.path.join(ROOT_DIR, "data", "ASL_Alphabet_Dataset")
 train_dir = os.path.join(data_dir, "asl_alphabet_train")
 reduced_dir = os.path.join(data_dir, "reduced_train")
 
+# --- Hyperparameters and Configuration ---
 img_size = 64
 batch_size = 32
 
 selected_classes = ["A", "B", "C", "I", "L", "V"]
 images_per_class = 5000
 
+# --- Data Preparation ---
 start_date = print_start_message()
+
+# Creates a smaller, balanced subset of the training data for selected classes.
 create_reduced_dir(reduced_dir, train_dir, selected_classes, images_per_class)
 
+# Configure data augmentation for training images.
 train_datagen = ImageDataGenerator(
-    rescale=1.0 / 255,  # Normalization
+    rescale=1.0 / 255,  # Normalize pixel values to [0, 1].
     rotation_range=25,  # Slightly larger rotation
     zoom_range=0.3,  # Larger zoom
     width_shift_range=0.2,  # Larger shifts
@@ -51,7 +61,7 @@ train_datagen = ImageDataGenerator(
     validation_split=0.2,
 )
 
-# Create training data generator from reduced dataset
+# Create training data generator from the reduced dataset.
 train_generator = train_datagen.flow_from_directory(
     reduced_dir,
     target_size=(img_size, img_size),
@@ -62,11 +72,10 @@ train_generator = train_datagen.flow_from_directory(
     subset="training",
     shuffle=True,
 )
-
 print(collections.Counter(train_generator.classes))
-
 save_class_indices(train_generator, ROOT_DIR)
 
+# Validation data generator (only rescale, no augmentation).
 val_datagen = ImageDataGenerator(rescale=1.0 / 255, validation_split=0.2)
 val_generator = val_datagen.flow_from_directory(
     reduced_dir,
@@ -79,60 +88,66 @@ val_generator = val_datagen.flow_from_directory(
     shuffle=False,
 )
 
-# Build CNN model architecture
+# --- CNN Model Architecture ---
 model = Sequential(
     [
         Input(shape=(img_size, img_size, 1)),
-
-        # 1st Conv Block
-        Conv2D(32, (3, 3), activation="relu", padding="same", kernel_regularizer=l2(0.001)),
+        # Convolutional Block 1
+        Conv2D(
+            32, (3, 3), activation="relu", padding="same", kernel_regularizer=l2(0.001)
+        ),  # L2 regularization helps prevent overfitting
+        BatchNormalization(),  # Normalizes activations, aiding stability.
+        MaxPooling2D(pool_size=(2, 2)),  # Reduces spatial dimensions.
+        # Convolutional Block 2
+        Conv2D(
+            64, (3, 3), activation="relu", padding="same", kernel_regularizer=l2(0.001)
+        ),
         BatchNormalization(),
         MaxPooling2D(pool_size=(2, 2)),
-
-        # 2nd Conv Block
-        Conv2D(64, (3, 3), activation="relu", padding="same", kernel_regularizer=l2(0.001)),
+        # Convolutional Block 3
+        Conv2D(
+            128, (3, 3), activation="relu", padding="same", kernel_regularizer=l2(0.001)
+        ),
         BatchNormalization(),
         MaxPooling2D(pool_size=(2, 2)),
-
-        # 3rd Conv Block
-        Conv2D(128, (3, 3), activation="relu", padding="same", kernel_regularizer=l2(0.001)),
+        # Convolutional Block 4 (deeper feature extraction)
+        Conv2D(
+            256, (3, 3), activation="relu", padding="same", kernel_regularizer=l2(0.001)
+        ),
         BatchNormalization(),
         MaxPooling2D(pool_size=(2, 2)),
-
-        # 4th Conv Block (NEW - deeper feature extractor)
-        Conv2D(256, (3, 3), activation="relu", padding="same", kernel_regularizer=l2(0.001)),
-        BatchNormalization(),
-        MaxPooling2D(pool_size=(2, 2)),
-
-        # Global feature pooling
-        GlobalAveragePooling2D(),
-
-        # Fully Connected Layer with more capacity
+        GlobalAveragePooling2D(),  # Flattens feature maps by averaging, reducing parameters.
+        # Fully Connected Layer
         Dense(512, activation="relu", kernel_regularizer=l2(0.001)),
-        Dropout(0.5),
-
-        # Output Layer - 6 classes for ASL
-        Dense(6, activation="softmax"),
+        Dropout(0.5),  # Randomly sets 50% of inputs to zero to prevent overfitting.
+        # Output Layer
+        Dense(
+            len(selected_classes), activation="softmax"
+        ),  # Softmax for multi-class probability output.
     ]
 )
 
-optimizer = Adam(learning_rate=0.0005)
-optimizer2 = AdamW(
-    learning_rate=0.0005, weight_decay=0.0001
-)
+# --- Model Compilation ---
+optimizer = AdamW(learning_rate=0.0005, weight_decay=0.0001)
 model.compile(
-    optimizer=optimizer2,
-    loss=CategoricalCrossentropy(label_smoothing=0.1),
+    optimizer=optimizer,
+    loss=CategoricalCrossentropy(
+        label_smoothing=0.1
+    ),  # Crossentropy with label smoothing for better generalization.
     metrics=["accuracy"],
 )
 
-# Define callbacks: early stopping, checkpoint saving, and learning rate reduction
-early_stop = EarlyStopping(monitor="val_loss", patience=5, restore_best_weights=True)
+early_stop = EarlyStopping(
+    monitor="val_loss", patience=5, restore_best_weights=True
+)  # Stops training if validation loss doesn't improve.
 checkpoint = ModelCheckpoint(
     "../../model/best_model.keras", save_best_only=True, monitor="val_loss"
-)
-reduce_lr = ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=2, verbose=1)
+)  # Saves the best model based on validation loss.
+reduce_lr = ReduceLROnPlateau(
+    monitor="val_loss", factor=0.5, patience=2, verbose=1
+)  # Reduces learning rate when validation loss plateaus.
 
+# --- Model Training ---
 history = model.fit(
     train_generator,
     validation_data=val_generator,
@@ -140,30 +155,23 @@ history = model.fit(
     callbacks=[early_stop, checkpoint, reduce_lr],
 )
 
+# --- Post-Training Operations ---
 print_end_message(start_date)
-
 pickle_history(history, ROOT_DIR)
-
-# Plot training & validation loss/accuracy curves
 plot_model_loss_accuracy(history)
-
 save_model(model, ROOT_DIR)
-
-# Print model architecture summary
 print_model_summary(model)
 
-
-# Evaluate model on validation set
+# --- Model Evaluation ---
 loss, accuracy = model.evaluate(val_generator)
 print(f"Validation Loss: {loss}")
 print(f"Validation Accuracy: {accuracy}")
 
-# Plot and save confusion matrix as a heatmap
-val_generator.reset()
+# --- Confusion Matrix and Classification Report ---
+val_generator.reset()  # Resets the generator to ensure consistent prediction order.
 preds = model.predict(val_generator)
-y_pred = np.argmax(preds, axis=1)
+y_pred = np.argmax(preds, axis=1)  # Converts probabilities to class labels.
 y_true = val_generator.classes
-
 print(confusion_matrix(y_true, y_pred))
 print(classification_report(y_true, y_pred, target_names=selected_classes))
 
